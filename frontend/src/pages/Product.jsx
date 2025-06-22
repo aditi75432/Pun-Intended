@@ -1,14 +1,15 @@
+// src/pages/Product.jsx
 import React, { useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ShopContext } from '../context/ShopContext';
-import { assets } from '../assets/frontend_assets/assets';
+import { ShopContext } from '../context/ShopContext'; // Ensure this path is correct
+import { assets } from '../assets/frontend_assets/assets'; // Ensure this path is correct
 
 const Product = () => {
     const { productId } = useParams();
-    const { products, currency } = useContext(ShopContext);
+    const { products, currency, addToCart } = useContext(ShopContext); // Get addToCart from context
     const [productData, setProductData] = useState(null);
     const [image, setImage] = useState('');
-    const [size, setSize] = useState('');
+    const [selectedSize, setSelectedSize] = useState(''); // Renamed to selectedSize for clarity
 
     useEffect(() => {
         const fetchProductData = () => {
@@ -16,10 +17,23 @@ const Product = () => {
             if (product) {
                 setProductData(product);
                 setImage(product.image[0]);
+                // Set a default size if available and no size is pre-selected
+                if (product.sizes && product.sizes.length > 0 && !selectedSize) {
+                    setSelectedSize(product.sizes[0]);
+                }
             }
         };
         fetchProductData();
-    }, [productId, products]);
+    }, [productId, products, selectedSize]); // Added selectedSize to dependency array
+
+    const handleAddToCart = () => {
+        if (!selectedSize) {
+            alert('Please select a size before adding to cart.'); // Basic validation
+            return;
+        }
+        addToCart(productId, selectedSize, 1); // Add to cart with selected size and quantity 1
+        alert(`Added ${productData.name} (Size: ${selectedSize}) to cart!`); // Feedback
+    };
 
     return productData ? (
         <div className='border-t-2 pt-10 transition-opacity ease-in duration-500 opacity-100 px-10 sm:px-20'>
@@ -29,10 +43,10 @@ const Product = () => {
                 <div className='flex gap-3'>
                     <div className='flex flex-col gap-3'>
                         {productData.image.map((item, index) => (
-                            <img 
-                                key={index} 
-                                src={item} 
-                                className='w-16 h-16 cursor-pointer border border-gray-300' 
+                            <img
+                                key={index}
+                                src={item}
+                                className='w-16 h-16 cursor-pointer border border-gray-300'
                                 onClick={() => setImage(item)}
                                 alt='Thumbnail'
                             />
@@ -57,29 +71,38 @@ const Product = () => {
                     <p className='mt-5 text-gray-600 leading-6'>{productData.description}</p>
 
                     {/* Size Selection */}
-                    <div className='mt-6'>
-                        <p className='font-medium'>Select Size</p>
-                        <div className='flex gap-2 mt-2'>
-                            {productData.sizes.map((item, index) => (
-                                <button 
-                                    key={index} 
-                                    onClick={() => setSize(item)}
-                                    className={`border py-2 px-4 text-sm ${item === size ? 'border-black' : 'border-gray-300'}`}
-                                >
-                                    {item}
-                                </button>
-                            ))}
+                    {productData.sizes && productData.sizes.length > 0 && ( // Conditionally render if sizes exist
+                        <div className='mt-6'>
+                            <p className='font-medium'>Select Size</p>
+                            <div className='flex gap-2 mt-2'>
+                                {productData.sizes.map((item, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => setSelectedSize(item)}
+                                        className={`border py-2 px-4 text-sm ${item === selectedSize ? 'border-black' : 'border-gray-300'}`}
+                                    >
+                                        {item}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
+
 
                     {/* Add to Cart Button */}
-                    <button className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700 mt-6'>
+                    <button
+                        onClick={handleAddToCart} // Call the new handler
+                        className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700 mt-6'
+                    >
                         ADD TO CART
                     </button>
                 </div>
             </div>
         </div>
-    ) : <div className='opacity-0'></div>;
+    ) : <div className='opacity-0'></div>; // Render a transparent div while loading
 };
 
 export default Product;
+
+
+
