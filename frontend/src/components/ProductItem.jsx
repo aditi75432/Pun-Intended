@@ -1,3 +1,4 @@
+// src/components/ProductItem.jsx
 import React, { useContext } from 'react';
 import { ShopContext } from '../context/ShopContext';
 import { Link } from 'react-router-dom';
@@ -17,3 +18,5 @@ const ProductItem = ({ id, image, name, price }) => {
 }
 
 export default ProductItem;
+
+
