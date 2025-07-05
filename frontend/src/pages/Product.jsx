@@ -1,38 +1,69 @@
 // src/pages/Product.jsx
 import React, { useContext, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { ShopContext } from '../context/ShopContext'; // Ensure this path is correct
-import { assets } from '../assets/frontend_assets/assets'; // Ensure this path is correct
+import { useParams, Link } from 'react-router-dom'; // Import Link for cheaper alternatives
+import { ShopContext } from '../context/ShopContext';
+import { assets } from '../assets/frontend_assets/assets';
+import axios from 'axios'; // Import axios for the new API call
 
 const Product = () => {
     const { productId } = useParams();
-    const { products, currency, addToCart } = useContext(ShopContext); // Get addToCart from context
+    const { products, currency, addToCart } = useContext(ShopContext);
     const [productData, setProductData] = useState(null);
     const [image, setImage] = useState('');
-    const [selectedSize, setSelectedSize] = useState(''); // Renamed to selectedSize for clarity
+    const [selectedSize, setSelectedSize] = useState('');
+
+    // NEW: State for discount information
+    const [discountInfo, setDiscountInfo] = useState(null);
+    const [discountLoading, setDiscountLoading] = useState(false);
+    const [discountError, setDiscountError] = useState(null);
 
     useEffect(() => {
         const fetchProductData = () => {
+            // Your existing logic to find product data
             const product = products.find((item) => item._id === productId);
             if (product) {
                 setProductData(product);
                 setImage(product.image[0]);
-                // Set a default size if available and no size is pre-selected
                 if (product.sizes && product.sizes.length > 0 && !selectedSize) {
                     setSelectedSize(product.sizes[0]);
                 }
             }
         };
         fetchProductData();
-    }, [productId, products, selectedSize]); // Added selectedSize to dependency array
+    }, [productId, products, selectedSize]);
+
+    // NEW: useEffect to fetch discount information when productData is available
+    useEffect(() => {
+        const fetchDiscount = async () => {
+            if (productData) { // Only fetch if product data is loaded
+                setDiscountLoading(true);
+                setDiscountError(null); // Clear previous errors
+                try {
+                    // Call your Node.js backend endpoint for discount
+                    // Ensure your backend is running on http://localhost:5000
+                    // And your mockProducts have 'id' properties that match your CSVs
+                    const response = await axios.post('http://localhost:5000/api/get-product-discount', {
+                        productId: productData._id // Use productData._id from your mockProducts
+                    });
+                    setDiscountInfo(response.data);
+                } catch (err) {
+                    console.error('Error fetching discount:', err);
+                    setDiscountError("Could not load discount information.");
+                } finally {
+                    setDiscountLoading(false);
+                }
+            }
+        };
+        fetchDiscount();
+    }, [productData]); // Dependency on productData ensures it runs once the product details are loaded
 
     const handleAddToCart = () => {
         if (!selectedSize) {
-            alert('Please select a size before adding to cart.'); // Basic validation
+            alert('Please select a size before adding to cart.');
             return;
         }
-        addToCart(productId, selectedSize, 1); // Add to cart with selected size and quantity 1
-        alert(`Added ${productData.name} (Size: ${selectedSize}) to cart!`); // Feedback
+        addToCart(productId, selectedSize, 1);
+        alert(`Added ${productData.name} (Size: ${selectedSize}) to cart!`);
     };
 
     return productData ? (
@@ -71,7 +102,7 @@ const Product = () => {
                     <p className='mt-5 text-gray-600 leading-6'>{productData.description}</p>
 
                     {/* Size Selection */}
-                    {productData.sizes && productData.sizes.length > 0 && ( // Conditionally render if sizes exist
+                    {productData.sizes && productData.sizes.length > 0 && (
                         <div className='mt-6'>
                             <p className='font-medium'>Select Size</p>
                             <div className='flex gap-2 mt-2'>
@@ -88,10 +119,43 @@ const Product = () => {
                         </div>
                     )}
 
+                    {/* NEW: Discount Information Display */}
+                    <div className='mt-6'>
+                        {discountLoading && <p className='text-blue-600'>Checking for discounts...</p>}
+                        {discountError && <p className='text-red-500'>{discountError}</p>}
+                        {/* Display discount if available and positive */}
+                        {discountInfo && discountInfo.suggested_discount_percent > 0 ? (
+                            <div className='bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative' role="alert">
+                                <strong className='font-bold'>Special Offer! </strong>
+                                <span className='block sm:inline'>Get **{discountInfo.suggested_discount_percent}% OFF** (${discountInfo.suggested_discount_amount.toFixed(2)}) on this item!</span>
+                                <p className='text-sm mt-1'>{discountInfo.explanation}</p>
+                            </div>
+                        ) : (
+                            // Display if no discount and not loading/error
+                            !discountLoading && !discountError && discountInfo && (
+                                <p className='text-gray-500 text-sm'>No special discount available for this item right now. {discountInfo.explanation}</p>
+                            )
+                        )}
+                        {/* Display cheaper alternatives if provided and no discount */}
+                        {discountInfo && discountInfo.cheaper_alternatives && discountInfo.cheaper_alternatives.length > 0 && (
+                            <div className='mt-4'>
+                                <p className='font-medium'>🔻 Consider these alternatives in the same category:</p>
+                                <ul className='list-disc list-inside text-sm text-gray-700'>
+                                    {discountInfo.cheaper_alternatives.map(alt => (
+                                        <li key={alt.product_id}>
+                                            <Link to={`/product/${alt.product_id}`} className='text-blue-500 hover:underline'>
+                                                {alt.product_name} (${alt.price.toFixed(2)})
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
 
                     {/* Add to Cart Button */}
                     <button
-                        onClick={handleAddToCart} // Call the new handler
+                        onClick={handleAddToCart}
                         className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700 mt-6'
                     >
                         ADD TO CART
@@ -103,6 +167,3 @@ const Product = () => {
 };
 
 export default Product;
-
-
-
