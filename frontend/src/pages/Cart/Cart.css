@@ -1,0 +1,77 @@
+/* Existing Cart.css styles */
+
+/* Styles for the new "Visualize My Outfit" button */
+.visualize-outfit-btn {
+    background-color: #4CAF50; /* Green color, adjust as per your theme */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 20px; /* Space from the checkout button */
+    transition: background-color 0.3s ease;
+    width: 100%; /* Make it full width like checkout button */
+}
+
+.visualize-outfit-btn:hover {
+    background-color: #45a049; /* Slightly darker green on hover */
+}
+
+/* Styles for the Modal Overlay (the dark background behind the pop-up) */
+.demo-outfit-modal-overlay {
+    position: fixed; /* Fixed position relative to the viewport */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+    display: flex; /* Use flexbox to center content */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    z-index: 1000; /* Ensure it's on top of all other page content */
+}
+
+/* Styles for the Modal Content (the white box with the image) */
+.demo-outfit-modal-content {
+    background: white; /* White background for the modal box */
+    padding: 20px;
+    border-radius: 8px; /* Slightly rounded corners */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Soft shadow */
+    position: relative; /* For positioning the close button */
+    max-width: 90%; /* Max width, responsive */
+    max-height: 90%; /* Max height, responsive */
+    overflow-y: auto; /* Enable scrolling if content is too tall */
+    text-align: center; /* Center text and image inside */
+}
+
+/* Styles for the Close Button */
+.demo-outfit-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 28px; /* Larger font size for easy clicking */
+    cursor: pointer;
+    color: #333; /* Dark grey color */
+    font-weight: bold; /* Make it bold */
+}
+
+.demo-outfit-modal-close:hover {
+    color: #000; /* Black on hover */
+}
+
+/* Styles for the Modal Title */
+.demo-outfit-modal-content h3 {
+    margin-top: 0;
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 24px; /* Larger heading */
+}
+
+/* Styles for the displayed image within the modal */
+.demo-outfit-image {
+    max-width: 100%; /* Ensure image fits within the modal content */
+    height: auto; /* Maintain aspect ratio */
+    border-radius: 5px; /* Slightly rounded corners for the image */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for the image */
+}
