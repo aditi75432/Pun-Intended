@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+easyocr
+pandas
+python-multipart
+thefuzz
